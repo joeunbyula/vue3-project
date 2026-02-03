@@ -1,13 +1,18 @@
 <template>
-  <!-- v-bind: => : 로 표기-->
-  <div :class="nameClass">
-    {{ name }} 
-  </div>
-  <input :type="type" :value="name"/>
-  <!-- v-on: => @로 표기-->
+  <!-- 양방향바인딩 v1 -->
+  <!-- <input 
+    type="text" 
+    :value="name"
+    @input="updateName"
+  > -->
+  <!-- 양방향 바인딩 : v-model 사용 -->
+  <input 
+    type="text" 
+    v-model="name"
+  >
   <button 
     class="btn btn-primary"
-    @click="updateName"
+    @click="onSubmit"
   >click
   </button>
 </template>
@@ -16,28 +21,21 @@
 import { ref } from 'vue';
   export default {
     setup() {
-      /**
-       * let을 사용하면 값을 변경할지라도
-       * 화면에서는 update가 안된다.
-       * 그래서 ref 사용한다.
-       * 숫자, string, object 등 어떠한 타입에도 가능하다.
-       */
       const name = ref('eunbyul is me!');
-      const type = ref('number');
-      const nameClass = ref('name');
-
     
-      const updateName = () => {
-        //let과 다르게 ref는 .value로 접근하여 값을 변경해줘야함.
-        name.value = 'eunbyul !!';
-        type.value = 'text';
-        nameClass.value = 'skyblue';
-      }
+      const onSubmit = () => {
+        console.log(name.value);
+      };
+
+      //양방향바인딩 v1
+      // const updateName = (e) => {
+      //   name.value = e.target.value;
+      // };
+
       return {
         name,
-        type,
-        nameClass,
-        updateName
+        onSubmit,
+        //updateName //양방향바인딩 v1
       }
     }
   }
@@ -46,10 +44,6 @@ import { ref } from 'vue';
 <style>
   .name {
     color: slateblue;
-  }
-
-  .skyblue {
-    color: skyblue;
   }
 </style>
 
