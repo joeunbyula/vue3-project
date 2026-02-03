@@ -1,41 +1,64 @@
 <template>
-  <!-- 양방향바인딩 v1 -->
-  <!-- <input 
-    type="text" 
-    :value="name"
-    @input="updateName"
-  > -->
-  <!-- 양방향 바인딩 : v-model 사용 -->
-  <input 
-    type="text" 
-    v-model="name"
-  >
-  <button 
-    class="btn btn-primary"
-    @click="onSubmit"
-  >click
-  </button>
+  <div class="container">
+  <h1>To-Do List</h1>
+   <!-- e.preventDefault() == @submit.prevent -->
+    <form 
+      class="d-flex"
+      @submit.prevent="onSubmit"  
+    >
+        <div class="flex-grow-1 mr-2">
+            <input 
+            class="form-control"
+            type="text" 
+            v-model="todo"
+            placeholder="Type new to-do"
+          >
+        </div>
+        <div>
+          <button 
+            class="btn btn-primary"
+            type="submit"
+          >
+            Add
+          </button>
+         </div>
+    </form>
+    <div 
+      class="card mt-2"
+      v-for="todo in todos"
+      :key="todo.id"
+    >
+      <div class="card-body p-2">
+        {{ todo.subject }}
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import { ref } from 'vue';
   export default {
     setup() {
-      const name = ref('eunbyul is me!');
+      const todo = ref('');
+      const todos = ref([ 
+        { id:1, subject:'휴대폰 사기' },
+        { id:2, subject:'장보기' }
+      ]);
     
       const onSubmit = () => {
-        console.log(name.value);
+        //e.preventDefault();
+        todos.value.push({
+          id: Date.now(),
+          subject : todo.value
+        });
+        todo.value = '';
       };
 
-      //양방향바인딩 v1
-      // const updateName = (e) => {
-      //   name.value = e.target.value;
-      // };
 
       return {
-        name,
+        todo,
+        todos,
         onSubmit,
-        //updateName //양방향바인딩 v1
       }
     }
   }
