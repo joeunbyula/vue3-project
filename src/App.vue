@@ -1,12 +1,6 @@
 <template>
-  <!-- v-show는 조건 상관없이 전부 랜더링 후 display none,block-->
-  <!-- v-if는 조건에 맞는 부분만 랜더링, -->
-  <!-- <div v-if="toggle">true</div>
-  <div v-else>false</div>
-  <button @click="onToggle">Toggle</button> -->
   <div class="container">
   <h1>To-Do List</h1>
-   <!-- e.preventDefault() == @submit.prevent -->
     <form @submit.prevent="onSubmit">
       <div class="d-flex">
         <div class="flex-grow-1 mr-2">
@@ -29,12 +23,41 @@
       <div v-show="hasError" style="color:red">The field cannot be empty</div>
     </form>
     <div 
+      v-if="!todos.length"
+    >
+        추가된 Todo가 없습니다.
+    </div>
+    <div 
       class="card mt-2"
-      v-for="todo in todos"
+      v-for="(todo, index) in todos"
       :key="todo.id"
     >
-      <div class="card-body p-2">
-        {{ todo.subject }}
+      <div class="card-body p-2 d-flex align-items-center">
+        <div class="form-check flex-grow-1">
+          <input 
+            class="form-check-input" 
+            type="checkbox"
+            v-model="todo.completed"
+            >
+          <!-- <label 
+            class="form-check-label"
+            :style="todo.completed? todoStyle : {}"
+          > -->
+          <label 
+            class="form-check-label"
+            :class="{ todo: todo.completed }"
+          >
+            {{ todo.subject }}
+          </label>
+        </div>
+        <div>
+          <button 
+            class="btn btn-danger btn-sm"
+            @click="deleteTodo(index)"
+            >
+            Delete
+          </button>
+        </div>       
       </div>
     </div>
   </div>
@@ -46,16 +69,14 @@ import { ref } from 'vue';
     setup() {
       const toggle = ref(false);
       const todo = ref('');
-      
-      const todos = ref([ 
-        { id:1, subject:'휴대폰 사기' },
-        { id:2, subject:'장보기' }
-      ]);
-
+      const todos = ref([]);
       const hasError = ref(false);
+      const todoStyle = {
+        textDecoration: 'line-through',
+        color: 'gray'
+      }
     
       const onSubmit = () => {
-        //e.preventDefault();
 
         if(!todo.value.length) {
           hasError.value = true;
@@ -65,11 +86,15 @@ import { ref } from 'vue';
         hasError.value = false;
         todos.value.push({
           id: Date.now(),
-          subject : todo.value
+          subject : todo.value,
+          completed: false
         });
         todo.value = '';
       };
       
+      const deleteTodo = (index) => {
+        todos.value.splice(index,1)
+      }
       const onToggle = () => {
         toggle.value = !toggle.value;
       }
@@ -78,7 +103,9 @@ import { ref } from 'vue';
         todo,
         todos,
         hasError,
+        todoStyle,
         onSubmit,
+        deleteTodo,
         onToggle
       }
     }
@@ -86,8 +113,9 @@ import { ref } from 'vue';
 </script>
 
 <style>
-  .name {
-    color: slateblue;
+  .todo {
+    color: gray;
+    text-decoration: line-through;
   }
 </style>
 
