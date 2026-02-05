@@ -1,112 +1,57 @@
 <template>
   <div class="container">
   <h1>To-Do List</h1>
-    <form @submit.prevent="onSubmit">
-      <div class="d-flex">
-        <div class="flex-grow-1 mr-2">
-            <input 
-            class="form-control"
-            type="text" 
-            v-model="todo"
-            placeholder="Type new to-do"
-          >
-        </div>
-        <div>
-          <button 
-            class="btn btn-primary"
-            type="submit"
-          >
-            Add
-          </button>
-         </div>
-      </div>   
-      <div v-show="hasError" style="color:red">The field cannot be empty</div>
-    </form>
+  <TodoSimpleForm @add-todo="addTodo"/>
     <div 
-      v-if="!todos.length"
-    >
+        v-if="!todos.length"
+      >
         추가된 Todo가 없습니다.
     </div>
-    <div 
-      class="card mt-2"
-      v-for="(todo, index) in todos"
-      :key="todo.id"
-    >
-      <div class="card-body p-2 d-flex align-items-center">
-        <div class="form-check flex-grow-1">
-          <input 
-            class="form-check-input" 
-            type="checkbox"
-            v-model="todo.completed"
-            >
-          <!-- <label 
-            class="form-check-label"
-            :style="todo.completed? todoStyle : {}"
-          > -->
-          <label 
-            class="form-check-label"
-            :class="{ todo: todo.completed }"
-          >
-            {{ todo.subject }}
-          </label>
-        </div>
-        <div>
-          <button 
-            class="btn btn-danger btn-sm"
-            @click="deleteTodo(index)"
-            >
-            Delete
-          </button>
-        </div>       
-      </div>
-    </div>
+  <TodoList 
+    :todos="todos" 
+    @delete-todo="deleteTodo"
+    @toggle-todo="toggleTodo"
+  />  
   </div>
 </template>
 
 <script>
 import { ref } from 'vue';
+import TodoSimpleForm from './components/TodoSimpleForm.vue';
+import TodoList from './components/TodoList.vue';
   export default {
+    components: {
+      TodoSimpleForm,
+      TodoList
+    },
+
     setup() {
-      const toggle = ref(false);
-      const todo = ref('');
+     
       const todos = ref([]);
-      const hasError = ref(false);
+      
       const todoStyle = {
         textDecoration: 'line-through',
         color: 'gray'
       }
     
-      const onSubmit = () => {
-
-        if(!todo.value.length) {
-          hasError.value = true;
-          return;
-        } 
-
-        hasError.value = false;
-        todos.value.push({
-          id: Date.now(),
-          subject : todo.value,
-          completed: false
-        });
-        todo.value = '';
+      const addTodo = (todo) => {
+        todos.value.push(todo);
       };
       
       const deleteTodo = (index) => {
-        todos.value.splice(index,1)
+        todos.value.splice(index,1);
       }
-      const onToggle = () => {
-        toggle.value = !toggle.value;
+
+      const toggleTodo = (index) => {
+        todos.value[index].completed = !todos.value[index].completed;
       }
 
       return {
-        todo,
         todos,
-        hasError,
         todoStyle,
-        onSubmit,
+        addTodo,
         deleteTodo,
-        onToggle
+        toggleTodo,
       }
     }
   }
