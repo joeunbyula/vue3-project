@@ -44,34 +44,54 @@ import TodoList from './components/TodoList.vue';
         color: 'gray'
       }
     
+      const getTodos = async () => {
+        try {
+          const res = await axios.get('http://localhost:3000/todos');
+          todos.value = res.data;
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      getTodos();
+
       const addTodo = async (todo) => {
         // 데이터베이스에 저장
         error.value = '';
         try {
           const res = await axios.post('http://localhost:3000/todos', {
             subject: todo.subject,
-            computed: todo.completed,
+            completed: todo.completed,
           })
           todos.value.push(res.data);
         } catch(err) {
           console.error(err);
           error.value = "Something went wrong.";
         }
-        // .then(res => {
-        //   console.log(res)
-        //   todos.value.push(res.data);
-        // }).catch(err => {
-        //   console.error(err);
-        //   error.value = "Something went wrong.";
-        // });
       };
       
-      const deleteTodo = (index) => {
-        todos.value.splice(index,1);
+      const deleteTodo = async (index) => {
+        try {
+          error.value = '';
+          const id = todos.value[index].id;
+          await axios.delete('http://localhost:3000/todos/'+id);
+          todos.value.splice(index,1);
+          //getTodos();
+        } catch (err) {
+          console.log(err);
+        }
       }
 
-      const toggleTodo = (index) => {
-        todos.value[index].completed = !todos.value[index].completed;
+      const toggleTodo = async (index) => {
+        try {
+          error.value = '';
+          const id = todos.value[index].id;
+          await axios.patch('http://localhost:3000/todos/'+id, {
+              completed: !todos.value[index].completed
+          });
+          todos.value[index].completed = !todos.value[index].completed;
+        } catch (err) {
+          console.log(err);
+        }
       }
 
       const searchText = ref("");
@@ -93,6 +113,7 @@ import TodoList from './components/TodoList.vue';
         toggleTodo,
         searchText,
         filteredTodos,
+        getTodos,
         error
       }
     }

@@ -1,24 +1,19 @@
 {
   "todos": [
     {
-      "subject": "aaa",
-      "computed": false,
+      "subject": "buy milk",
+      "completed": false,
       "id": 1
     },
     {
-      "subject": "aaaa",
-      "computed": false,
+      "subject": "clean my room",
+      "completed": false,
       "id": 2
     },
     {
-      "subject": "bbbb",
-      "computed": false,
+      "subject": "study vuejs",
+      "completed": true,
       "id": 3
-    },
-    {
-      "subject": "hello",
-      "computed": false,
-      "id": 4
     }
   ]
 }
