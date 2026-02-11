@@ -44,19 +44,26 @@ import TodoList from './components/TodoList.vue';
         color: 'gray'
       }
     
-      const addTodo = (todo) => {
+      const addTodo = async (todo) => {
         // 데이터베이스에 저장
         error.value = '';
-        axios.post('http://localhost:3000/todos', {
-          subject: todo.subject,
-          computed: todo.completed,
-        }).then(res => {
-          console.log(res)
+        try {
+          const res = await axios.post('http://localhost:3000/todos', {
+            subject: todo.subject,
+            computed: todo.completed,
+          })
           todos.value.push(res.data);
-        }).catch(err => {
+        } catch(err) {
           console.error(err);
           error.value = "Something went wrong.";
-        });
+        }
+        // .then(res => {
+        //   console.log(res)
+        //   todos.value.push(res.data);
+        // }).catch(err => {
+        //   console.error(err);
+        //   error.value = "Something went wrong.";
+        // });
       };
       
       const deleteTodo = (index) => {
