@@ -20,6 +20,31 @@
     @delete-todo="deleteTodo"
     @toggle-todo="toggleTodo"
   />  
+  <hr/>
+  <nav aria-label="Page navigation example">
+    <ul class="pagination">
+      <li 
+        v-if="currentPage !== 1" 
+        class="page-item"
+      >
+        <a class="page-link" style="cursor:pointer" @click="getTodos(currentPage-1)">Previous</a>
+      </li>
+      <li 
+        class="page-item" 
+        v-for="page in numberOfPages"
+        :key="page"
+        :class="currentPage === page ? 'active' : ''"
+      >
+        <a class="page-link" style="cursor:pointer" @click="getTodos(page)">{{ page }}</a>
+      </li>
+      <li 
+        v-if="numberOfPages !== currentPage"
+        class="page-item"
+      >
+        <a class="page-link" style="cursor:pointer" @click="getTodos(currentPage+1)">Next</a>
+      </li>
+    </ul>
+  </nav>
   </div>
 </template>
 
@@ -37,6 +62,14 @@ import TodoList from './components/TodoList.vue';
     setup() {
      
       const todos = ref([]);
+      const numberOfTodos = ref(0);
+
+      const limit = 5;
+      const currentPage = ref(1);
+      const numberOfPages = computed(() => {
+        return Math.ceil(numberOfTodos.value / limit);
+      })
+
       const error = ref('');
       
       const todoStyle = {
@@ -44,9 +77,11 @@ import TodoList from './components/TodoList.vue';
         color: 'gray'
       }
     
-      const getTodos = async () => {
+      const getTodos = async (page = currentPage.value) => {
         try {
-          const res = await axios.get('http://localhost:3000/todos');
+          currentPage.value = page;
+          const res = await axios.get(`http://localhost:3000/todos?_page=${currentPage.value}&_limit=${limit}`);
+          numberOfTodos.value = res.headers['x-total-count'];
           todos.value = res.data;
         } catch (err) {
           console.log(err);
@@ -114,6 +149,8 @@ import TodoList from './components/TodoList.vue';
         searchText,
         filteredTodos,
         getTodos,
+        numberOfPages,
+        currentPage,
         error
       }
     }
