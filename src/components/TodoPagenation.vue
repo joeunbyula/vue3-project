@@ -42,7 +42,7 @@ export default {
         const limit = 5;
         const currentPage = ref(1);
         
-        // 값이 바뀔 때마다 실행하고 싶을 때
+        // 값이 바뀔 때마다 실행하고 싶을 때!
         const numberOfPages = computed(() => {
             // 전달받은 값이 문자열일 경우를 대비해 Number로 변환
             const total = Number(props.numberOfTodos);
