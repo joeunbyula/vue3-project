@@ -1,18 +1,22 @@
 <template>
   <div class="container">
-  <h4>Count: {{ count }}</h4>
-  <h4>double Count computed : {{ doubleCountComputed }}</h4>
-  <h4>double Count Method : {{ doubleCountMethod(2) }}</h4>
-  <button @click="count++">Add One</button>
   <h1>To-Do List</h1>
+  <input 
+    class="form-control"
+    type="text" 
+    v-model="searchText"
+    placeholder="Search"
+  >
+  <hr />
   <TodoSimpleForm @add-todo="addTodo"/>
+    <div style="color: red">{{ error }}</div>
     <div 
-        v-if="!todos.length"
+        v-if="!filteredTodos.length"
       >
-        추가된 Todo가 없습니다.
+        There is noting to display
     </div>
   <TodoList 
-    :todos="todos" 
+    :todos="filteredTodos" 
     @delete-todo="deleteTodo"
     @toggle-todo="toggleTodo"
   />  
@@ -21,6 +25,7 @@
 
 <script>
 import { ref, computed } from 'vue';
+import axios from 'axios';
 import TodoSimpleForm from './components/TodoSimpleForm.vue';
 import TodoList from './components/TodoList.vue';
   export default {
@@ -32,6 +37,7 @@ import TodoList from './components/TodoList.vue';
     setup() {
      
       const todos = ref([]);
+      const error = ref('');
       
       const todoStyle = {
         textDecoration: 'line-through',
@@ -39,7 +45,18 @@ import TodoList from './components/TodoList.vue';
       }
     
       const addTodo = (todo) => {
-        todos.value.push(todo);
+        // 데이터베이스에 저장
+        error.value = '';
+        axios.post('http://localhost:3000/todos', {
+          subject: todo.subject,
+          computed: todo.completed,
+        }).then(res => {
+          console.log(res)
+          todos.value.push(res.data);
+        }).catch(err => {
+          console.error(err);
+          error.value = "Something went wrong.";
+        });
       };
       
       const deleteTodo = (index) => {
@@ -50,30 +67,26 @@ import TodoList from './components/TodoList.vue';
         todos.value[index].completed = !todos.value[index].completed;
       }
 
-      const count = ref(1);
-      /**
-       * 함수랑 다른 점은 
-       * 인자를 받을 수 없음
-       * computed함수 안에 들어있는  reactive state가 있을때만 그리고 변할때만 저장
-       * computed는 값을 캐시처리함(저장해놓음)
-       */
-      const doubleCountComputed = computed(() => {
-        return count.value * 2;
-      });
+      const searchText = ref("");
+      const filteredTodos = computed(() => {
+        if(searchText.value) {
+          return todos.value.filter(todo => {
+            return todo.subject.includes(searchText.value);
+          })
+        } 
 
-      const doubleCountMethod = (name) => {
-        return count.value * name;
-      }
+        return todos.value;
+      }) 
 
       return {
         todos,
         todoStyle,
-        count,
-        doubleCountComputed,
-        doubleCountMethod,
         addTodo,
         deleteTodo,
         toggleTodo,
+        searchText,
+        filteredTodos,
+        error
       }
     }
   }
