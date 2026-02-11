@@ -21,10 +21,30 @@
     @toggle-todo="toggleTodo"
   />  
   <hr/>
-  <TodoPagenation 
-    :numberOfTodos="numberOfTodos"
-    @get-todo="getTodos"
-  />
+  <nav aria-label="Page navigation example">
+    <ul class="pagination">
+      <li 
+        v-if="currentPage !== 1" 
+        class="page-item"
+      >
+        <a class="page-link" style="cursor:pointer" @click="getTodos(currentPage-1)">Previous</a>
+      </li>
+      <li 
+        class="page-item" 
+        v-for="page in numberOfPages"
+        :key="page"
+        :class="currentPage === page ? 'active' : ''"
+      >
+        <a class="page-link" style="cursor:pointer" @click="getTodos(page)">{{ page }}</a>
+      </li>
+      <li 
+        v-if="numberOfPages !== currentPage"
+        class="page-item"
+      >
+        <a class="page-link" style="cursor:pointer" @click="getTodos(currentPage+1)">Next</a>
+      </li>
+    </ul>
+  </nav>
   </div>
 </template>
 
@@ -33,12 +53,10 @@ import { ref, computed } from 'vue';
 import axios from 'axios';
 import TodoSimpleForm from './components/TodoSimpleForm.vue';
 import TodoList from './components/TodoList.vue';
-import TodoPagenation from './components/TodoPagenation.vue';
   export default {
     components: {
       TodoSimpleForm,
-      TodoList,
-      TodoPagenation
+      TodoList
     },
 
     setup() {
@@ -59,9 +77,10 @@ import TodoPagenation from './components/TodoPagenation.vue';
         color: 'gray'
       }
     
-      const getTodos = async (page) => {
+      const getTodos = async (page = currentPage.value) => {
         try {
-          const res = await axios.get(`http://localhost:3000/todos?_page=${page}&_limit=${limit}`);
+          currentPage.value = page;
+          const res = await axios.get(`http://localhost:3000/todos?_page=${currentPage.value}&_limit=${limit}`);
           numberOfTodos.value = res.headers['x-total-count'];
           todos.value = res.data;
         } catch (err) {
