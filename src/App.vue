@@ -21,7 +21,7 @@
     @toggle-todo="toggleTodo"
   />  
   <hr/>
-  <nav aria-label="Page navigation example">
+  <nav v-if="filteredTodos.length" aria-label="Page navigation example">
     <ul class="pagination">
       <li 
         v-if="currentPage !== 1" 
@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import axios from 'axios';
 import TodoSimpleForm from './components/TodoSimpleForm.vue';
 import TodoList from './components/TodoList.vue';
@@ -71,6 +71,28 @@ import TodoList from './components/TodoList.vue';
       })
 
       const error = ref('');
+
+      watch([currentPage, numberOfTodos], (currentPage, prev) => {
+        console.log(currentPage, prev)
+      });
+      
+      // watch(currentPage, (currentPage, prev) => {
+      //   console.log('hello');
+      //   console.log(currentPage);
+      //   console.log(prev);
+      // })
+      // watchEffect(() => {
+      //   console.log(currentPage.value);
+      //   console.log(numberOfTodos.value);
+      // })
+
+      // const a = reactive({
+      //   b: 1
+      // })
+      // watchEffect(() => {
+      //   console.log(a.b);
+      // })
+      // a.b=4;
       
       const todoStyle = {
         textDecoration: 'line-through',
