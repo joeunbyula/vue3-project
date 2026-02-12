@@ -1,6 +1,5 @@
 <template>
-  <router-view/>
-  <div class="container">
+  <div>
   <h1>To-Do List</h1>
   <input 
     class="form-control"
@@ -118,14 +117,14 @@ import TodoList from '@/components/TodoList.vue';
         }
       }
 
-      const toggleTodo = async (index) => {
+      const toggleTodo = async (index, checked) => {
         try {
           error.value = '';
           const id = todos.value[index].id;
           await axios.patch('http://localhost:3000/todos/'+id, {
-              completed: !todos.value[index].completed
+              completed: checked
           });
-          todos.value[index].completed = !todos.value[index].completed;
+          todos.value[index].completed = checked;
         } catch (err) {
           console.log(err);
         }
