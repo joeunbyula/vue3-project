@@ -31,7 +31,7 @@
             </div>
         </div>
        
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="submit" class="btn btn-primary" :disabled="!todoUpdate">Save</button>
         <button class="btn btn-outline-dark ml-2" @click="moveToTodoListPage()">Cancel</button>      
 
     </form>
@@ -40,13 +40,15 @@
 <script>
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { ref,computed } from 'vue';
+import _ from 'lodash';
 export default {
     setup() {
         const route = useRoute();
         const router = useRouter();
         //const subject = ref('');
         const loading = ref(true);
+        const originalTodo = ref(null);
         const todo = ref(null);
         const todoId = ref('');
 
@@ -54,7 +56,8 @@ export default {
             todoId.value = route.params.id;
             try {
                 const res = await axios.get(`http://localhost:3000/todos/${todoId.value}`);
-                todo.value = res.data;
+                todo.value = {...res.data};
+                originalTodo.value = {...res.data};
                 loading.value = false;
                 //subject.value = res.data.subject;
             } catch(err) {
@@ -66,16 +69,24 @@ export default {
         const toggleTodoStatus = async() => {
             todo.value.completed = !todo.value.completed;
         }
+
+        const todoUpdate = computed(() => {
+            return !_.isEqual(todo.value, originalTodo.value)
+        });
+
         const saveTodo = async() => {
-            await axios.put(`http://localhost:3000/todos/${todoId.value}`, {
+            const res = await axios.put(`http://localhost:3000/todos/${todoId.value}`, {
               subject: todo.value.subject,
               completed: todo.value.completed
             });
-            //여기 부분 잘 안됨. -> form태그에 @submit.prevent로 이벤트 실행시켜야함.. 버블링때문에 안되는거였음..
-            router.push({
-                name: 'Todos',
-            })
+
+            originalTodo.value = {...res.data}
+            // //여기 부분 잘 안됨. -> form태그에 @submit.prevent로 이벤트 실행시켜야함.. 버블링때문에 안되는거였음..
+            // router.push({
+            //     name: 'Todos',
+            // })
         }
+
 
         const moveToTodoListPage = () => {
             router.push({
@@ -87,6 +98,7 @@ export default {
           //  subject,
             loading,
             todo,
+            todoUpdate,
             saveTodo,
             toggleTodoStatus,
             moveToTodoListPage
