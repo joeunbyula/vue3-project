@@ -44,7 +44,6 @@
 
 <script>
 
-   //import { watchEffect } from 'vue';
     export default {
         props: {
             todos: {
@@ -55,9 +54,6 @@
         emits: ['toggle-todo, delete-todo'],
         setup(props, { emit }) {
 
-          // watchEffect(() => {
-          //   console.log(props.todos.length)
-          // })
             const onDelete = (index) => {
                 emit('delete-todo', index)
             }

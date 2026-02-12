@@ -11,17 +11,17 @@
   <TodoSimpleForm @add-todo="addTodo"/>
     <div style="color: red">{{ error }}</div>
     <div 
-        v-if="!filteredTodos.length"
+        v-if="!todos.length"
       >
         There is noting to display
     </div>
   <TodoList 
-    :todos="filteredTodos" 
+    :todos="todos" 
     @delete-todo="deleteTodo"
     @toggle-todo="toggleTodo"
   />  
   <hr/>
-  <nav v-if="filteredTodos.length" aria-label="Page navigation example">
+  <nav v-if="todos.length" aria-label="Page navigation example">
     <ul class="pagination">
       <li 
         v-if="currentPage !== 1" 
@@ -63,37 +63,14 @@ import TodoList from './components/TodoList.vue';
      
       const todos = ref([]);
       const numberOfTodos = ref(0);
-
       const limit = 5;
       const currentPage = ref(1);
       const numberOfPages = computed(() => {
         return Math.ceil(numberOfTodos.value / limit);
       })
-
+      const searchText = ref('');
       const error = ref('');
 
-      watch([currentPage, numberOfTodos], (currentPage, prev) => {
-        console.log(currentPage, prev)
-      });
-      
-      // watch(currentPage, (currentPage, prev) => {
-      //   console.log('hello');
-      //   console.log(currentPage);
-      //   console.log(prev);
-      // })
-      // watchEffect(() => {
-      //   console.log(currentPage.value);
-      //   console.log(numberOfTodos.value);
-      // })
-
-      // const a = reactive({
-      //   b: 1
-      // })
-      // watchEffect(() => {
-      //   console.log(a.b);
-      // })
-      // a.b=4;
-      
       const todoStyle = {
         textDecoration: 'line-through',
         color: 'gray'
@@ -102,7 +79,8 @@ import TodoList from './components/TodoList.vue';
       const getTodos = async (page = currentPage.value) => {
         try {
           currentPage.value = page;
-          const res = await axios.get(`http://localhost:3000/todos?_page=${currentPage.value}&_limit=${limit}`);
+          console.log(searchText.value+"@@")
+          const res = await axios.get(`http://localhost:3000/todos?subject_like=${searchText.value}&_page=${currentPage.value}&_limit=${limit}`);
           numberOfTodos.value = res.headers['x-total-count'];
           todos.value = res.data;
         } catch (err) {
@@ -151,16 +129,19 @@ import TodoList from './components/TodoList.vue';
         }
       }
 
-      const searchText = ref("");
-      const filteredTodos = computed(() => {
-        if(searchText.value) {
-          return todos.value.filter(todo => {
-            return todo.subject.includes(searchText.value);
-          })
-        } 
+      
+      watch(searchText,() => {
+        getTodos(1);
+      })
+      // const filteredTodos = computed(() => {
+      //   if(searchText.value) {
+      //     return todos.value.filter(todo => {
+      //       return todo.subject.includes(searchText.value);
+      //     })
+      //   } 
 
-        return todos.value;
-      }) 
+      //   return todos.value;
+      // }) 
 
       return {
         todos,
@@ -169,7 +150,7 @@ import TodoList from './components/TodoList.vue';
         deleteTodo,
         toggleTodo,
         searchText,
-        filteredTodos,
+        //filteredTodos,
         getTodos,
         numberOfPages,
         currentPage,
