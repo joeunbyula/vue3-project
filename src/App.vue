@@ -6,6 +6,7 @@
     type="text" 
     v-model="searchText"
     placeholder="Search"
+    @keyup.enter="searchTodo"
   >
   <hr />
   <TodoSimpleForm @add-todo="addTodo"/>
@@ -79,8 +80,7 @@ import TodoList from './components/TodoList.vue';
       const getTodos = async (page = currentPage.value) => {
         try {
           currentPage.value = page;
-          console.log(searchText.value+"@@")
-          const res = await axios.get(`http://localhost:3000/todos?subject_like=${searchText.value}&_page=${currentPage.value}&_limit=${limit}`);
+          const res = await axios.get(`http://localhost:3000/todos?subject_like=${searchText.value}&_page=${currentPage.value}&_limit=${limit}&_sort=id&_order=desc`);
           numberOfTodos.value = res.headers['x-total-count'];
           todos.value = res.data;
         } catch (err) {
@@ -93,11 +93,12 @@ import TodoList from './components/TodoList.vue';
         // 데이터베이스에 저장
         error.value = '';
         try {
-          const res = await axios.post('http://localhost:3000/todos', {
+          await axios.post('http://localhost:3000/todos', {
             subject: todo.subject,
             completed: todo.completed,
           })
-          todos.value.push(res.data);
+          //todos.value.push(res.data);
+          getTodos(1);
         } catch(err) {
           console.error(err);
           error.value = "Something went wrong.";
@@ -109,8 +110,8 @@ import TodoList from './components/TodoList.vue';
           error.value = '';
           const id = todos.value[index].id;
           await axios.delete('http://localhost:3000/todos/'+id);
-          todos.value.splice(index,1);
-          //getTodos();
+          //todos.value.splice(index,1);
+          getTodos();
         } catch (err) {
           console.log(err);
         }
@@ -129,9 +130,16 @@ import TodoList from './components/TodoList.vue';
         }
       }
 
-      
-      watch(searchText,() => {
+      let timeout = null;
+      const searchTodo = () => {
+        clearTimeout(timeout);
         getTodos(1);
+      }
+      watch(searchText,() => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          getTodos(1);
+        },1000);  
       })
       // const filteredTodos = computed(() => {
       //   if(searchText.value) {
@@ -152,6 +160,7 @@ import TodoList from './components/TodoList.vue';
         searchText,
         //filteredTodos,
         getTodos,
+        searchTodo,
         numberOfPages,
         currentPage,
         error
