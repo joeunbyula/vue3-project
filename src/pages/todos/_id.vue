@@ -36,12 +36,13 @@
 
     </form>
     <ToastPage v-if="showToast" :message="toastMessage" :type="toastType"/>
+    <div id="dom">dommm</div>
 </template>
 
 <script>
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
-import { ref,computed } from 'vue';
+import { ref,computed, onBeforeMount, onMounted, onBeforeUpdate, onUpdated, onBeforeUnmount, onUnmounted } from 'vue';
 import _ from 'lodash';
 import ToastPage from '@/components/ToastPage.vue';
 
@@ -50,6 +51,36 @@ export default {
         ToastPage
     },
     setup() {
+
+        //돔에 생성되기 전,,? 마운트가 되기 전에 setup안에 있는 것들 부터 쑥 읽고 실행된다.
+        onBeforeMount(() => {
+            console.log(document.querySelector('#dom'));
+        });
+
+        //마운튿되고나서 실행
+        onMounted(() => {
+            console.log('onBeforeUpdate');
+        });
+
+        onBeforeUpdate(() => {
+            console.log(document.querySelector('#dom'));
+        });
+
+        onUpdated(() => {
+            console.log('onUpdated');
+        });
+
+        onBeforeUnmount(() => {
+            console.log('onBeforeUnmount');
+        });
+
+        //컴포넌트를 빠져나갈때 메모리 정리하기 위해 쓴다..
+        onUnmounted(() => {
+            console.log('onUnmounted');
+        });
+
+         console.log('hello');
+
         const route = useRoute();
         const router = useRouter();
         //const subject = ref('');
