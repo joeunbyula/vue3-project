@@ -1,6 +1,18 @@
 <template>
   <div>
-  <h1>To-Do List</h1>
+    <div
+      class="d-flex justify-content-between mb-3"
+    >
+      <h1>To-Do List</h1>
+      <!-- <router-link class="btn btn-primary" :to="{name: 'TodoCreate'}">Create Todo</router-link> -->
+       <button 
+        class="btn btn-primary"
+        @click="moveToCreatePage"
+       >
+        Create Todo
+      </button>
+    </div>
+  
   <input 
     class="form-control"
     type="text" 
@@ -9,7 +21,7 @@
     @keyup.enter="searchTodo"
   >
   <hr />
-  <TodoSimpleForm @add-todo="addTodo"/>
+  <!-- <TodoSimpleForm @add-todo="addTodo"/> -->
     <div 
         v-if="!todos.length"
       >
@@ -51,20 +63,22 @@
 
 <script>
 import { ref, computed, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
-import TodoSimpleForm from '@/components/TodoSimpleForm.vue';
+// import TodoSimpleForm from '@/components/TodoSimpleForm.vue';
 import TodoList from '@/components/TodoList.vue';
 import ToastPage from '@/components/ToastPage.vue';
 import { useToast } from '@/composables/toast';
   export default {
     components: {
-      TodoSimpleForm,
+      // TodoSimpleForm,
       TodoList,
       ToastPage
     },
 
     setup() {
      
+      const router = useRouter();
       const todos = ref([]);
       const numberOfTodos = ref(0);
       const limit = 5;
@@ -80,21 +94,6 @@ import { useToast } from '@/composables/toast';
         toastType,
         triggerToast
       } = useToast();
-      // const showToast = ref(false);
-      // const toastMessage = ref('');
-      // const toastType = ref('');
-      // const toastTimeout = ref(null);
-      // const triggerToast = (message, type = 'success') => {
-      //   toastMessage.value = message;
-      //   toastType.value = type;
-      //   showToast.value = true;
-
-      //   toastTimeout.value = setTimeout(() => {
-      //     toastMessage.value = '';
-      //     toastType.value = '';
-      //     showToast.value = false;
-      //   },2000)
-      // }
 
       const todoStyle = {
         textDecoration: 'line-through',
@@ -114,6 +113,11 @@ import { useToast } from '@/composables/toast';
       }
       getTodos();
 
+      const moveToCreatePage = () => {
+        router.push({
+          name: 'TodoCreate'
+        })
+      }
       const addTodo = async (todo) => {
         // 데이터베이스에 저장
         try {
@@ -194,7 +198,8 @@ import { useToast } from '@/composables/toast';
         currentPage,
         showToast,
         toastMessage,
-        toastType
+        toastType,
+        moveToCreatePage
       }
     }
   }

@@ -1,7 +1,7 @@
 <template>
-    <h1>Todo Page</h1>
+    <h1>Create Todo</h1>
     
-    <TodoForm :editing="true"/>
+    <TodoForm />
 </template>
 
 <script>
