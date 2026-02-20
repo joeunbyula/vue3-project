@@ -11,6 +11,9 @@
                 <div class="form-group">
                     <label>Subject</label>
                     <input type="text" class="form-control" v-model="todo.subject"/>
+                    <div class="text-red" v-if="subjectError">
+                     {{ subjectError }}
+                    </div>
                 </div>  
             </div>
             <div class="col-6" v-if="editing">
@@ -73,6 +76,7 @@ export default {
             body: ''
         });
         const todoId = ref('');
+        const subjectError = ref('');
         const {
             showToast,
             toastMessage,
@@ -105,18 +109,24 @@ export default {
 
         const todoUpdate = computed(() => {
             return !_.isEqual(todo.value, originalTodo.value)
-        });
-
-      
+        });      
         
         const saveTodo = async() => {
             try {
                 let res;
+                subjectError.value = '';
                 const todoData = {
                     subject: todo.value.subject,
                     completed: todo.value.completed,
                     body: todo.value.body
                 }
+
+                if(!todoData.subject) {
+                    subjectError.value = 'Empty Subject!';
+                    triggerToast('Empty Subject!', 'danger');
+                    return;
+                }
+
                 if(props.editing) {
                     res = await axios.put(`http://localhost:3000/todos/${todoId.value}`, todoData);
                     originalTodo.value = {...res.data};
@@ -155,6 +165,7 @@ export default {
             showToast,
             toastMessage,
             toastType,
+            subjectError,
             saveTodo,
             toggleTodoStatus,
             moveToTodoListPage
@@ -162,3 +173,10 @@ export default {
     }
 }
 </script>
+
+<!-- scope는 해당 컴포넌트 안에서만 사용하게끔 해주는 것..-->
+<style scoped>
+    .text-red {
+        color: red;
+    }
+</style>
