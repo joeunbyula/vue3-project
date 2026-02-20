@@ -10,7 +10,6 @@
   >
   <hr />
   <TodoSimpleForm @add-todo="addTodo"/>
-    <div style="color: red">{{ error }}</div>
     <div 
         v-if="!todos.length"
       >
@@ -47,6 +46,7 @@
     </ul>
   </nav>
   </div>
+  <ToastPage v-if="showToast" :message="toastMessage" :type="toastType"/>
 </template>
 
 <script>
@@ -54,10 +54,13 @@ import { ref, computed, watch } from 'vue';
 import axios from 'axios';
 import TodoSimpleForm from '@/components/TodoSimpleForm.vue';
 import TodoList from '@/components/TodoList.vue';
+import ToastPage from '@/components/ToastPage.vue';
+import { useToast } from '@/composables/toast';
   export default {
     components: {
       TodoSimpleForm,
-      TodoList
+      TodoList,
+      ToastPage
     },
 
     setup() {
@@ -69,8 +72,29 @@ import TodoList from '@/components/TodoList.vue';
       const numberOfPages = computed(() => {
         return Math.ceil(numberOfTodos.value / limit);
       })
+
       const searchText = ref('');
-      const error = ref('');
+      const {
+        showToast,
+        toastMessage,
+        toastType,
+        triggerToast
+      } = useToast();
+      // const showToast = ref(false);
+      // const toastMessage = ref('');
+      // const toastType = ref('');
+      // const toastTimeout = ref(null);
+      // const triggerToast = (message, type = 'success') => {
+      //   toastMessage.value = message;
+      //   toastType.value = type;
+      //   showToast.value = true;
+
+      //   toastTimeout.value = setTimeout(() => {
+      //     toastMessage.value = '';
+      //     toastType.value = '';
+      //     showToast.value = false;
+      //   },2000)
+      // }
 
       const todoStyle = {
         textDecoration: 'line-through',
@@ -85,13 +109,13 @@ import TodoList from '@/components/TodoList.vue';
           todos.value = res.data;
         } catch (err) {
           console.log(err);
+          triggerToast('Something went wrong.', 'danger');
         }
       }
       getTodos();
 
       const addTodo = async (todo) => {
         // 데이터베이스에 저장
-        error.value = '';
         try {
           await axios.post('http://localhost:3000/todos', {
             subject: todo.subject,
@@ -100,33 +124,36 @@ import TodoList from '@/components/TodoList.vue';
           //todos.value.push(res.data);
           getTodos(1);
         } catch(err) {
-          console.error(err);
-          error.value = "Something went wrong.";
+          console.log(err);
+          triggerToast('Something went wrong.', 'danger');
         }
       };
       
       const deleteTodo = async (index) => {
         try {
-          error.value = '';
           const id = todos.value[index].id;
           await axios.delete('http://localhost:3000/todos/'+id);
           //todos.value.splice(index,1);
           getTodos();
         } catch (err) {
           console.log(err);
+          triggerToast('Something went wrong.', 'danger');
         }
       }
 
       const toggleTodo = async (index, checked) => {
         try {
-          error.value = '';
           const id = todos.value[index].id;
           await axios.patch('http://localhost:3000/todos/'+id, {
               completed: checked
           });
           todos.value[index].completed = checked;
+          const message = todos.value[index].completed ? 'Compelete!' : 'InComplete!';
+          const type = todos.value[index].completed ? 'success' : 'danger';
+          triggerToast(message, type);
         } catch (err) {
           console.log(err);
+          triggerToast('Something went wrong.', 'danger');
         }
       }
 
@@ -140,7 +167,9 @@ import TodoList from '@/components/TodoList.vue';
         timeout = setTimeout(() => {
           getTodos(1);
         },1000);  
-      })
+      });
+
+     
       // const filteredTodos = computed(() => {
       //   if(searchText.value) {
       //     return todos.value.filter(todo => {
@@ -163,7 +192,9 @@ import TodoList from '@/components/TodoList.vue';
         searchTodo,
         numberOfPages,
         currentPage,
-        error
+        showToast,
+        toastMessage,
+        toastType
       }
     }
   }
