@@ -44,11 +44,13 @@
         </div>       
       </div>
     </div>   
-    <Modal 
-      v-if="showModal"
-      @close="closeModal"
-      @delete-todo="onDelete"
-    />
+    <Teleport to="#modal">
+      <Modal 
+        v-if="showModal"
+        @close="closeModal"
+        @delete-todo="onDelete"
+      />
+    </Teleport>
 </template>
 
 <script>
