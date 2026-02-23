@@ -10,7 +10,7 @@
         style="cursor: pointer;"
         @click="moveToPage(todo.id)"
       >
-        <div class="form-check flex-grow-1">
+        <div class="flex-grow-1">
           <!-- <input 
             class="form-check-input" 
             type="checkbox"
@@ -18,7 +18,7 @@
             > -->
          <!-- props는 one-way여서 자식에서 부모의 값을 변경시킬 수 없다. -->
          <input 
-            class="form-check-input" 
+            class="ml-2 mr-2" 
             type="checkbox"
             :checked="todo.completed"
             @change="toggleTodo(index, $event)"
@@ -28,46 +28,67 @@
             class="form-check-label"
             :style="todo.completed? todoStyle : {}"
           > -->
-          <label 
-            class="form-check-label"
+          <span 
             :class="{ todo: todo.completed }"
           >
             {{ todo.subject }}
-          </label>
+        </span>
         </div>
         <div>
           <button 
             class="btn btn-danger btn-sm"
-            @click.stop="onDelete(index)"
+            @click.stop="openModal(todo.id)"
             >
             Delete
           </button>
         </div>       
       </div>
     </div>   
+    <Modal 
+      v-if="showModal"
+      @close="closeModal"
+      @delete-todo="onDelete"
+    />
 </template>
 
 <script>
 
     import { useRouter } from 'vue-router';
+    import Modal from './ModalPage.vue';
+    import { ref } from 'vue';
     export default {
+        components: {
+          Modal
+        },
         props: {
             todos: {
                 type: Array,
                 required: true //필수여부
             }
         }, 
-        emits: ['toggle-todo, delete-todo'],
+        emits: ['toggle-todo, delete-todo', 'closeModal'],
         setup(props, { emit }) {
-
             const router = useRouter();
-            const onDelete = (index) => {
-                emit('delete-todo', index)
+            const showModal = ref(false);
+            const todoDeleteId = ref(null);
+
+            const openModal = (id) => {
+              showModal.value = true;
+              todoDeleteId.value = id;
+            }
+            const onDelete = () => {
+              emit('delete-todo', todoDeleteId.value);
+              closeModal();
             }
 
             const toggleTodo = (index, event) => {
                 emit('toggle-todo', index, event.target.checked);
             }   
+
+            const closeModal = () => {
+              todoDeleteId.value = null;
+              showModal.value = false;
+            }
 
             const moveToPage = (todoId) => {
               //router.push('/todos/'+todoId);
@@ -80,9 +101,12 @@
             }
             
             return {
+                showModal,
                 onDelete,
                 toggleTodo,
-                moveToPage
+                moveToPage,
+                openModal,
+                closeModal
             }
 
         }

@@ -133,9 +133,8 @@ import { useToast } from '@/composables/toast';
         }
       };
       
-      const deleteTodo = async (index) => {
+      const deleteTodo = async (id) => {
         try {
-          const id = todos.value[index].id;
           await axios.delete('http://localhost:3000/todos/'+id);
           //todos.value.splice(index,1);
           getTodos();
